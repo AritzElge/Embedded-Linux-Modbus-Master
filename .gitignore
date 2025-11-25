@@ -1,0 +1,35 @@
+# CMake Configuration files (automatically generated)
+#
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+
+# Project build directories (temporary)
+# Ignore any folder named 'build' in any subdirectory
+build/
+
+# Generated executable binaries (Daemons)
+# Ignore any file without an extension (typical for Linux executables)
+*App
+*.bin
+*.elf
+*.o
+*.d
+
+# Vim swap files
++.swp
+
+# External dependencies and thrid-party folders
+#
+# Ignore the buildroot/ folder inside src/galileo-master/
+src/galileo-master/buildroot/
+
+# Temporary files specific to the operating system (macOS, Windows, Linux)
+#
+# macOs
+.DS_Store
+
+# Linux
+*~
+.#*
