@@ -2,26 +2,21 @@ name: ShellCheck Static Analysis
 
 # Trigger this workflow on every 'push' or 'pull request' to the main branch
 on:
-	push:
-		branches: [main]
-	pull_request:
-		branches: [main]
+  push:
+    # Ensure 'branches:' is indented exactly two spaces under 'push:'
+    branches: [ main ]
+  pull_request:
+    # Ensure 'branches:' is indented exactly two spaces under 'pull_request:'
+    branches: [ main ]
 
 jobs:
-	shellcheck_analyze:
-		# Run this job on a fresh, recent Ubuntu enviroment
-		runs-on: ubuntu-latest
+  shellcheck_analyze:
+    runs-on: ubuntu-latest
 
-		steps:
-		# Step 1: Download your code from the repository into the Git Hub Actions enviroment
-		- uses: actions/checkout@v3
-
-		# Step 2: Install the ShellCheck tool on the Ubuntu system
-		- uses: Install ShellCheck
-		  run: sudo apt-get update && sudo apt-get install -y shellcheck
-
-		# Step 3: Run ShellCheck on the Bash scripts
-		- name: Run ShellCheck on Bash scripts
-		  run: |
-			# We use 'find' to locate all .sh files and run shellcheck
-			find . -name "*.sh" -print0 | xargs -0 shellcheck			
+    steps:
+    - uses: actions/checkout@v3
+    - name: Install ShellCheck
+      run: sudo apt-get update && sudo apt-get install -y shellcheck
+    - name: Run ShellCheck on all Bash scripts
+      run: |
+        find . -name "*.sh" -print0 | xargs -0 shellcheck
