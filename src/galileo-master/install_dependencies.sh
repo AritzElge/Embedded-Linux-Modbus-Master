@@ -9,7 +9,7 @@ INSTALL_FAILED=0
 if [ "$(id -u)" != "0" ]; then
 	echo "[WARNING] This script needs root privileges to install packages!"
 	echo "[WARNING] Please run this script with 'sudo ./install_dependencies.sh"
-	INSTALL_FAILED =1
+	INSTALL_FAILED=1
 	exit $INSTALL_FAILED
 fi
 

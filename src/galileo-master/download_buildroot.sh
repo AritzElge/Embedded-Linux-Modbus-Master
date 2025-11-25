@@ -19,15 +19,14 @@ fi
 echo "[INFO] Dependency installation finished successfully. Proceeding with Buildroot setup."
 
 # Change directory to ensure the scripts runs from the galileo-master/ root
-cd "$(dirname "$0")"
+cd "$(dirname "$0")" || exit 1
 
 echo " Starting Buildroot download for Galileo Gen 2"
 
 # -- Step1: Clone the Buildroot repository --
 if [ ! -d ".git" ]; then
 	echo "[INFO] .git directory not found. Cloning repository..."
-	git clone "$REPO_URL"
-	if [ $? -eq 0 ]; then
+	if git clone "$REPO_URL"; then
 		echo "[INFO] Cloning completed successfully."
 	else
 		echo "[ERROR] Failed during repository cloning. Exiting."
@@ -39,9 +38,8 @@ fi
 
 # -- Step 2: Switch to the specific version (tag) --
 echo "[INFO] Switching to the specific version (tag): 2019.02"
-cd buildroot
-git checkout "${BUIDLROOT_VERSION}"
-if [ $? -eq 0 ]; then
+cd buildroot || exit 1
+if git checkout "${BUIDLROOT_VERSION}"; then
 	echo "[INFO] Checkout completed successfully. version 2019.02 selected."
 else
 	echo "[ERROR] Failed to checkout version 2019.02, Exiting."
