@@ -1,4 +1,3 @@
-yaml
 name: Static Analysis (ShellCheck & CppCheck)
 
 # Trigger this workflow on every 'push' or 'pull request' to the main branch
