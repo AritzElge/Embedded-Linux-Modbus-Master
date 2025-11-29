@@ -10,6 +10,13 @@
 #define T_LONG_S   0L
 #define T_LONG_NS  600000000// Long Blink
 #define T_OFF_SYNC 2        // Long synchronization pause
+#define T_ON_HEARTBEAT 100000000   // On time for heartbeat blink
+#define T_OFF_HEARTBEAT 900000000  // OFF time for heartbeat blink
+
+// MUX GPIO pinout
+#define IO_EXP_MUX_SEL1 30  // I/O Expander MUX Select 1
+#define IO_EXP_MUX_SEL2 31  // I/O Expander MUX Select 2
+#define QUARK_GPIO_46   46  // Quark GPIO 46
 
 // -- Function Prototypes (Declarations) --
 int get_operation_status(void);
@@ -109,7 +116,7 @@ int main()
 
     mraa_init();
     {
-      int mux_gpio[3] = {30, 31, 46};
+      int mux_gpio[3] = {IO_EXP_MUX_SEL1, IO_EXP_MUX_SEL2, QUARK_GPIO_46};
       for (int i_gpio = 0; i_gpio < 3; i_gpio++)
       {
         mraa_gpio_context mux_gpio_pin = mraa_gpio_init_raw(mux_gpio[i_gpio]);
@@ -128,8 +135,8 @@ int main()
     {
         if (status == 0)
 	{
-	    struct timespec ts_on = { .tv_sec = 0L, .tv_nsec = 100000000L };
-	    struct timespec ts_off = { .tv_sec = 0L, .tv_nsec = 900000000L };
+	    struct timespec ts_on = { .tv_sec = 0L, .tv_nsec = T_ON_HEARTBEAT };
+	    struct timespec ts_off = { .tv_sec = 0L, .tv_nsec = T_OFF_HEARTBEAT };
             // OK Status: Heatbeat activated
             mraa_gpio_write(led_gpio_pin, 1);
             nanosleep(&ts_on, NULL);
