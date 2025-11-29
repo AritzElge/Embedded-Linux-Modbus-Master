@@ -1,10 +1,51 @@
-# [Project Title: Embedded Linux Modbus Master]
+# Embedded Linux Integration with Intel Galileo Gen 2 (or ELI_galileo)
 
-[![ShellCheck Static Analysis](https://github.com/AritzElge/Embedded-Linux-Modbus-Master/actions/workflows/shellcheck_analysis.yml/badge.svg)](https://github.com/AritzElge/Embedded-Linux-Modbus-Master/actions/workflows/shellcheck_analysis.yml)
+![Project Status](https://img.shields.io/badge/Project Status-WIP)
+[![Static Analysis](https://github.com/AritzElge/ELI_galileo/actions/workflows/static_analysis.yml/badge.svg)](https://github.com/AritzElge/ELI_galileo/actions/workflows/static_analysis.yml)
 
-This repository presents an isolated master embedded control system implemented on an Intel Galileo Gen 2 (embedded Linux). The project demonstrates a rigorous engineering approach by developing software ranging from high-level scripts to optimized native C code with inline x86 assembly for efficient and deterministic hardware control.
+This repository presents a master home automation control system designed to operate on an Intel Galileo Gen 2, utilizing MODBUS TCP/IP for managing smart sensors and actuators within the local network.
 
-The goal is to control a Modbus TCP/IP network, prioritizing reliability, deterministic performance, and best practices for embedded systems.
+This project was selected as a technical challenge due to the platform's discontinued status and lack of official support, optimizing the system for the longevity and reliability of the available hardware.
+
+---
+
+## Table of Contents
+- [Key Features](#key-features)
+- [Hardware Used](#hardware-used)
+- [System Requirements](#system-requirements)
+- [Technical Features](#technical-features)
+- [Software Architecture](#software-architecture)
+- [Key Engineering Decisions](#key-engineering-decisions)
+- [Setup Steps](#setup-steps)
+- [Usage and Functionality](#usage-and-functionality)
+- [System Updates](#system-updates)
+- [Roadmap](#roadmap)
+- [Acknowledgements](#Acknowledgements)
+- [Contributing](CONTRIBUTING.md)
+- [License](LICENSE)
+- [Contact](#Contact)
+
+---    
+
+## Key Features
+
+*   **MODBUS TCP/IP Management:** Full communication and control of smart devices (sensors and actuators) over the local network.
+*   **SPI Interface:** Control of an LCD screen for local system status and error visualization.
+*   **Data Persistence:** Use of an external USB-HDD to store daemons and logs, mitigating the degradation of the OS microSD card.
+*   **Secure Updates:** *In-situ* update mechanism via a USB pendrive and `dpkg` package management with version verification.
+*   **Visual Diagnostics:** Status LED for error code indication.
+*   **Static ARP-Table:** for protection agains ARP-Poisoning. 
+
+## Hardware Used
+
+*   **Mainboard:** Intel Galileo Gen 2 (with CR2032 battery for RTC)
+*   **Storage:** MicroSD card (OS) and external USB-HDD (Daemons/Logs)
+*   **Interfaces:** LCD Screen (via SPI), Status LED, miniPCIExpress USB port expander, native Host-USB Port.
+*   **Network:** Ethernet connection for MODBUS TCP/IP.
+
+## System Requirements
+*   Host PC with Linux (for cross-compilation) and 'python2' compatibility.
+*   Intel Galileo Gen 2 board.
 
 ## Technical Features
 
@@ -12,10 +53,10 @@ The goal is to control a Modbus TCP/IP network, prioritizing reliability, determ
 *   **Languages Used:** Ash shell, Python 3, Native C, Modern C++.
 *   **Communication Protocol:** Modbus TCP/IP.
 *   **Hardware Interfaces:** SPI (for LCD), GPIO (for multiplexer and LED control), Ethernet (for Modbus communication).
-*   **Methodology:** Use of native POSIX APIs, BSD Sockets, `libmodbus`, `pthreads`, and POSIX shared memory (IPC).
+*   **Methodology:** Use of native POSIX APIs, BSD, Sockets, libmodbus, pthreads, and POSIX shared memory (IPC).
 *   **Build System Tool:** **Buildroot** (used to generate the toolchain and the final Linux image).
-* Integration of advanced static analysis: **CppcCheck** (with **MISRA C:2012** rules) and **ShellCheck** to ensure safety and compliance with coding standards in critical enviroments.
-* Full automation of the Continuous Integration (CI) using **GitHub Actions**.
+*   **Coding Standards and Safety:** Adoption of the **MISRA C:2012 coding standard** (enforced via **CppCheck** static analysis) for all critical C/C++ daemons. This ensures compliance with safety guidelines required in high-integrity environments, minimizing common vulnerabilities like buffer overflows and undefined behavior.
+*   Full automation of the Continuous Integration (CI) using **GitHub Actions**.
 
 ## Software Architecture
 
@@ -24,7 +65,7 @@ The goal is to control a Modbus TCP/IP network, prioritizing reliability, determ
 
 The system consists of several daemons that communicate internally:
 
-*   `modbus_daemon` (C/C++): Manages network communication with simulated slaves.
+*   `modbus_daemon` (C/C++): Manages network communication.
 *   `lcd_daemon` (C/C++): Controls the SPI display and shows system status.
 *   `status_manager` (C/C++): Uses POSIX shared memory (`shm_open`, `mmap`) for efficient IPC between daemons.
 
@@ -32,55 +73,98 @@ The system consists of several daemons that communicate internally:
 
 *   **Hybrid CI/CD Strategy:** Decision not to compile the entire Buildroot image in the cloud due to the performance and time limitations of public CI/CD runners. Instead, the validation (MISRA, unit tests) and packaging of the application software are prioritized.
 *   **Reproducibility of the Buildroot: Use of bash scripts and `defconfig` files to automate the complete configuration of the Buildroot workspace, ensuring reproducible builds locally without manual intervention.
-*   **Multi-Level Approach:** The same functionality (e.g., I/O control) has been implemented in Bash, Python and C to demonstrate the trade-offs of performance and control at each level of abstraction.
+*   **Optimal Language Selection (Multi-Level Approach):** Decision to select the most suitable language for each task based on criticality and required performance. 
+    *   **C/C++:** Used for performance-critical daemons (Modbus comms, SPI control) leveraging POSIX APIs for direct control.
+    *   **Python:** Used for complex logic tasks where development speed is key.
+    *   **Ash Shell/Bash:** Used exclusively for system initialization, setup scripts, and wrapper execution.
 *   **Resource Management (RAII):** Use of modern C++ and the RAII pattern for safe and automatic management of file descriptors and shared memory.
-*   **Network Security:** Use of static ARP tables (configurable upon deployment) to mitigate ARP spoofing attacks.
+*   **Timekeeping and Data Integrity:** Integration of a **CR2032 battery backup** for the Real-Time Clock (RTC) on the Galileo Gen 2 board. This ensures accurate timestamping of all system logs and events, which is critical for debugging, security auditing, and reliable data correlation in an isolated environment without constant NTP synchronization.
+*   **Network Security:** 
+    *   **Secure Access:** SSH access is restricted to public/private key authentication only, disabling password-based login for the root user to enhance security within the isolated LAN.
+    *   Use of static **ARP tables** (configurable upon deployment) to mitigate ARP spoofing attacks.
+    *   **Defense-in-Depth:** Implementation of local firewall rules using 'iptables' to enforce the principle of least privilege, blocking all traffic except strictly necessary Modbus TCP/IP communication and SSH access via the management IP.
+    *   **Network Isolation Strategy:** The system is designed to operate within an isolated local area network (LAN). This physical isolation, combined with static ARP/IP tables and a local firewall, forms the basis of a robust defense-in-depth security posture, crucial for critical infrastructure environments.
 
-## System Requirements
+## Setup Steps
 
-*   Host PC with Linux (for cross-compilation) and python2 compatibility.
-*   Intel Galileo Gen 2 board.
-
-## Compilation and Deployment Instructions
-
-There are two deployment methods: for development and for production:
-
-### Method 1: Iterative Development (Rapid Deployment)
-
-This method allows compilation on the host PC and rapid deployment of the binaries to the read/write capable Galileo via wget/SSH for quick testing.
-
-1.  Clone the repository: `git clone github.com`
-2.  Configure the Buildroot toolchain (see [docs/BUILDROOT_SETUP.md](docs/BUILDROOT_SETUP.md)).
-3.  Compile the project:
+1.  **Clone the repository:**
     ```bash
-    cd src/galileo-master/
-    cmake .
-    make
+    git clone github.com
+    cd your-project-name
     ```
-4.  Host a simple web server on your host PC (e.g., using Python: `python3 -m http.server 8000`).
-5.  Deploy to the Galileo using `wget`: `wget http://host_pc_ip:8000/daemon_name`
-6.  Configure the static ARP table manually (instructions in [docs/ARP_SETUP.md](docs/ARP_SETUP.md)).
 
-### Method 2: Production Deployment (Read-Only Image)
+2.  **Configure the Workspace:**
+    Run the setup script, which will download necessary dependencies and prepare the environment on the mounted USB-HDD.
+    ```bash
+    ./setup.sh
+    ```
 
-This is the industrial-grade method. Binaries are compiled directly into the final Linux image using Buildroot, and the root filesystem (`rootfs`) is mounted in read-only (`ro`) mode.
+3.  **Flash the Image to MicroSD**
+    Once the 'sdcard.img' is generated, use a tool like dd (Linux/macOS) or Balena Etcher (all OSes) to flash the image onto your MicroSD card.
+    
+4.  **Boot the Galileo:**
+    Insert the MicroSD car into the intel Galileo Gen 2 and power it on.
 
-1.  Ensure that the project packages are integrated into the Buildroot configuration.
-2.  Compile the complete Linux image using Buildroot.
-3.  Deploy the generated image to the Galileo's SD card.
-4.  The static ARP table configuration is included in the read-only `rootfs` startup scripts during compilation.
+## Usage and Functionality
 
-### Final Production/Deployment
+The system is designed to run autonomously on the Intel Galileo Gen 2 board. Upon booting, it automatically mounts the external USB-HDD and starts the necessary daemons (`modbus_daemon`, `lcd_daemon`, etc.).
 
-1. Point 1 (CI): The GitHub Actions workflow compiles , test, and generates the validated `.deb` artifact
-2. Point 2 (Local Preparation): The ./download_buildroot.sh script handles:
-    * Installing buildroot dependencies for the project
-    * Cloning the legacy version of Buildroot
-    * **Downloading the latest validates .deb package from GitHub Actions.**
-    * Applying the master configuration (.`defconfig`) automatically
-3. Point 3 (Image generation): It could be automated, but for flexibility with Host PCs it's manually made.
-    * make `galileo_defconfig && make -j N` (where `N` is the number of threads you want to use
+Interaction with the system is primarily done via SSH for maintenance and monitoring:
 
-## Contributions and License
+*   **System Status:** Use standard `systemctl` commands to check the service status (e.g., `systemctl status domotica-modbus-daemon`).
+*   **Logging:** Logs are stored in `/mnt/hdd/logs/`. You can monitor activity using standard Linux tools:
+    ```bash
+    tail -f /mnt/hdd/logs/modbus.log
+    ```
+*   **Physical Interface:** The onboard LED indicates error codes, and the SPI LCD displays the current system status (IP address, operational status).
 
-This project is under the [MIT License](LICENSE). Contributions are welcome.
+*Note: The user interface via the LCD is still in the early stages of development.*
+
+andard build tools installed
+*   A MicroSD Card reader/writer connected to your PC.
+
+
+## System Updates
+
+The system can be updated in the field using a USB pendrive containing the new `.deb` file.
+
+1.  Copy the `ELI-galileo-vX.Y.Z.deb` file to the root directory of the USB drive.
+2.  Insert the USB drive into the Galileo.
+3.  The update script will detect .deb package, verify it is newer than the current version installed on the HDD, and proceed with `dpkg -i`.
+
+## Roadmap
+
+The project is currently in active development. Below are our goals for upcoming releases.
+
+- **Version 0.9.0 (Q4 2025): Beta Stage - MVP**
+    - [x] Initial repository structure
+    - [x] Initial GitHub Actions CI setup
+    - [ ] Implement basic GPIO control
+    - [ ] Basic LED error signaling
+    - [ ] Implement basic SPI control
+    - [ ] Basic LCD interface via SPI
+    - [ ] Implement basic MODBUS control
+    - [ ] Implement basic MODBUS data polling
+    - [ ] Implement HDD-USB mounting and logging daemon
+    - [ ] '.defconfig' automatic addition to 'buildroot' compilation script
+    
+
+- **Version 1.0 (Q4 2026): Initial Release**
+    - [ ] Initial GitHub Actions CI/CD setup
+    - [ ] SD Card image generation via `./setup.sh` script
+
+- **Future Ideas (No ETA):**
+    - [ ] UPS communication for controlled and safe HDD and embedded system shutdown
+
+## Acknowledgements
+
+*   [Buildroot](buildroot.org): For the excellent tool for generating embedded Linux systems.
+*   [CppCheck](cppcheck.sourceforge.net): For the static analysis tool and MISRA C support.
+*   [GitHub Actions](docs.github.com): For providing the CI/CD automation platform.
+*   [Shields.io](shields.io): For the status badges used in this README.md file.
+
+## Contact
+
+Aritz Elgezabal - [LinkedIn Profile URL](https://www.linkedin.com/in/aritzelge/) - aelguezabal010@gmail.com
+
+Project Distribution: [github.com](https://github.com/AritzElge/ELI_galileo)
