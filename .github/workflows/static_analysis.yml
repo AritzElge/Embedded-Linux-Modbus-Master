@@ -19,21 +19,19 @@ jobs:
     - name: Run ShellCheck on all Bash scripts
       run: find . -name "*.sh" -print0 | xargs -0 shellcheck
 
-    #- name: Install Cppcheck
-    #  run: sudo apt-get install -y cppcheck
+    - name: Install Cppcheck
+      run: sudo apt-get install -y cppcheck
 
-    #- name: Run Cppcheck
-    #  id: cppcheck_run
-    #  # Usar un bloque multilínea 'run: |' para ejecutar comandos complejos de bash
-    #  run: |
-    #    # Use 'find' to locate every .c in the repository and pass as arguments
-    #    cppcheck --enable=all --std=c99 -D_POSIX_C_SOURCE=200809L \
-    #    --xml --ouput-file=cppcheck_results.xml $(find . -name "*.c") || true
-    #
-    #- name: Upload Cppcheck results artifact
-    #  uses: actions/upload-artifact@v3
-    #  with:
-    #    name: cppcheck-results
-    #    path: cppcheck_results.xml
+    - name: Run Cppcheck
+      id: cppcheck_run
+      run: |
+        cppcheck --enable=all --std=c99 -D_POSIX_C_SOURCE=200809L \
+        --xml --ouput-file=cppcheck_results.xml $(find . -name "*.c") || true
+    
+    - name: Upload Cppcheck results artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: cppcheck-results
+        path: cppcheck_results.xml
 
     
