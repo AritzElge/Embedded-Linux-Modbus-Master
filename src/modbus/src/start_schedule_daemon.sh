@@ -23,5 +23,5 @@ while true; do
     echo "Next execution in $SLEEP_SECONDS seconds." >> $LOG_FILE
 
     # 3. Wait for the calculated amount of time
-    sleep $SLEEP_SECONDS
+    sleep "$SLEEP_SECONDS"
 done
