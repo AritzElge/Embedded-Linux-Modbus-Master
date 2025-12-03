@@ -42,7 +42,6 @@ def run_polling_daemon():
         with open(SENSORS_FILE, "r") as f:
             devices = json.load(f)
         print(f"Process {os.getpid()}: JSON Mutex released.")
-    # The JSON mutex is released here.
 
     # --- 2. USE THE LOADED DATA (OUTSIDE THE JSON MUTEX) ---
     # Process each device. The function called internally uses the hardware mutex.

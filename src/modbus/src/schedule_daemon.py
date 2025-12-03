@@ -9,54 +9,71 @@ manages the hardware lock internally.
 
 import json
 import datetime
-from filelock import FileLock
+from modbus_client import set_actuator_reg 
+from filelock import FileLock 
 import os
 import time
-from modbus_client import set_actuator_reg
 
-# Mutex to protect the schedule.json file ONLY
-SCHEDULE_JSON_LOCK = "/tmp/schedule_app.lock" 
-SCHEDULE_FILE = "schedule.json" 
+# Mutex to protect the schedule.json file only
+schedule_json_lock = "/tmp/schedule_app.lock"
+schedule_file = "schedule.json"
 
-def read_and_execute_schedule():
+def read_and_execute_scheduled_events_with_window():
+    """
+    Reads the schedule.json file, determines which events should have run 
+    in the last minute (current minute and previous minute), and sends 
+    corresponding orders via the hardware client.
     
-    entry_to_execute = None
-    
-    # --- 1. LOCK, READ JSON, AND RELEASE JSON MUTEX ---
-    with FileLock(SCHEDULE_JSON_LOCK):
-        print(f"Process {os.getpid()}: JSON Mutex acquired for reading schedule.")
+    Uses a filelock for json file access and assumes the hardware client 
+    manages its own internal hardware lock.
+    """
+    entries_to_execute = []
+
+    # --- 1. lock, read json, and release json mutex ---
+    with FileLock(schedule_json_lock): 
+        print(f"process {os.getpid()}: json mutex acquired for reading schedule.")
         try:
-            with open(SCHEDULE_FILE, 'r') as f:
+            with open(schedule_file, 'r') as f:
                 schedule_data = json.load(f)
         except (FileNotFoundError, json.JSONDecodeError) as e:
             print(f"Error reading schedule file: {e}")
             return
         
-        # Logic to find the entry_to_execute for the current time
-        now = datetime.datetime.now().time()
-        for entry in schedule_data:
-            start_time = datetime.datetime.strptime(entry['start_time'], "%H:%M").time()
-            if now >= start_time:
-                entry_to_execute = entry
-            else:
-                break
+        # Determine the current time and the time one minute ago
+        now = datetime.datetime.now()
+        one_minute_ago = now - datetime.timedelta(minutes=1)
         
-        print(f"Process {os.getpid()}: JSON Mutex released.")
-    # The JSON mutex is released here.
+        # Define the acceptable time window: from one minute ago up to 'now'
+        target_minutes = {
+            (now.hour, now.minute),
+            (one_minute_ago.hour, one_minute_ago.minute)
+        }
+        
+        for entry in schedule_data:
+            scheduled_time_obj = datetime.datetime.strptime(entry['start_time'], "%H:%M").time()
+            scheduled_hour_minute = (scheduled_time_obj.hour, scheduled_time_obj.minute)
 
-    # --- 2. USE THE LOADED DATA (OUTSIDE THE JSON MUTEX) ---
-    # Now call the Modbus function. This function internally handles the hardware lock.
-    if entry_to_execute is not None:
-        print(f"Calling set_actuator_reg (will use hardware mutex internally)...")
-        set_actuator_reg(
-            entry_to_execute["label"], 
-            entry_to_execute["ip"], 
-            entry_to_execute["port"], 
-            entry_to_execute["register_address"], 
-            entry_to_execute["valor"]
-        )
+            if scheduled_hour_minute in target_minutes:
+                entries_to_execute.append(entry)
+
+        print(f"process {os.getpid()}: json mutex released.")
+
+    # --- 2. Execute the found events (outside the json mutex) ---
+    if entries_to_execute:
+        print(f"Found {len(entries_to_execute)} events scheduled within the last minute window.")
+        for entry in entries_to_execute:
+            set_actuator_reg( 
+                entry["label"], 
+                entry["ip"], 
+                entry["port"], 
+                entry["register_address"], 
+                entry["valor"] 
+            )
     else:
-        print("No suitable schedule entry found for the current time.")
+        print("No events found scheduled within the last minute window.")
 
 if __name__ == "__main__":
-    read_and_execute_schedule()
+    if not os.path.exists(schedule_file):
+        print(f"Error: The schedule file '{schedule_file}' was not found.")
+    else:
+        read_and_execute_scheduled_events_with_window()

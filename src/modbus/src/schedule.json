@@ -1,42 +1,50 @@
 [
     {
-        "start_time": "22:00",
-        "label": "Bilnder_1",
+        "start_time": "00:01",
+        "label": "Daily_Reset_All_Off",
         "ip": "XXX.XXX.XXX.XXX",
         "port": 5020,
         "register_address": 1,
-        "valor": "APAGADO"
+        "valor": 0
     },
     {
-        "start_time": "22:00",
-        "label": "Bilnder_1",
+        "start_time": "02:30",
+        "label": "Actuator_A_ON",
         "ip": "XXX.XXX.XXX.XXX",
         "port": 5020,
-        "register_address": 1,
-        "valor": "APAGADO"
+        "register_address": 2,
+        "valor": 1
     },
     {
-        "start_time": "22:00",
-        "label": "Bilnder_1",
+        "start_time": "12:31",
+        "label": "Actuator_A_OFF",
         "ip": "XXX.XXX.XXX.XXX",
         "port": 5020,
-        "register_address": 1,
-        "valor": "APAGADO"
+        "register_address": 2,
+        "valor": 0
     },
     {
-        "start_time": "22:00",
-        "label": "Bilnder_1",
+        "start_time": "12:00",
+        "label": "Actuator_B_ON",
         "ip": "XXX.XXX.XXX.XXX",
         "port": 5020,
-        "register_address": 1,
-        "valor": "APAGADO"
+        "register_address": 3,
+        "valor": 1
     },
     {
-        "start_time": "22:00",
-        "label": "Bilnder_1",
+        "start_time": "12:00",
+        "label": "Actuator_C_ON",
         "ip": "XXX.XXX.XXX.XXX",
         "port": 5020,
-        "register_address": 1,
-        "valor": "APAGADO"
+        "register_address": 4,
+        "valor": 1
+    },
+    {
+        "start_time": "23:59",
+        "label": "Actuator_C_OFF",
+        "ip": "XXX.XXX.XXX.XXX",
+        "port": 5020,
+        "register_address": 4,
+        "valor": 0
     }
 ]

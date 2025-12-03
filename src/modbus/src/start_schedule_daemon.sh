@@ -1,11 +1,11 @@
 #!/bin/sh
-# daemon.sh
+# start_schedule_daemon.sh
 # Runs continuously to manage the schedule without using cron.
 
-PYTHON_CMD=$(which python3)
 GET_TIME_SCRIPT="./get_sleep_time.py"
-ACTION_SCRIPT="./device_controller.py"
-LOG_FILE="/var/log/schedule_daemon.log"
+ACTION_SCRIPT="./schedule_daemon.py"
+LOG_FILE="/tmp/schedule_daemon.log"
+ERROR_LOG_FILE="/tmp/schedule_daemon_error.log"
 
 echo "Starting schedule daemon..." >> $LOG_FILE
 
@@ -14,11 +14,11 @@ while true; do
     
     # 1. Execute the main action (device_controller.py)
     # This locks schedule_app.lock, then releases it.
-    $PYTHON_CMD $ACTION_SCRIPT >> $LOG_FILE 2>&1
+    python $ACTION_SCRIPT >> $LOG_FILE 2> $ERROR_LOG_FILE
 
     # 2. Get the calculated sleep time.
     # This script waits for schedule_app.lock to be free (which it will be).
-    SLEEP_SECONDS=$($PYTHON_CMD $GET_TIME_SCRIPT)
+    SLEEP_SECONDS=$(python $GET_TIME_SCRIPT)
     
     echo "Next execution in $SLEEP_SECONDS seconds." >> $LOG_FILE
 
