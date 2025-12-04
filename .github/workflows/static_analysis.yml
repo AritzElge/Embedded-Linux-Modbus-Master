@@ -37,8 +37,8 @@ jobs:
         path: cppcheck_results.xml
 
     # --- Pylint Steps ---
-    - name: Install Pylint
-      run: pip install pylint filelock pymodbus
+    - name: Install Pylint and Python dependencies. (force pymodbus 2.5.3)
+      run: pip install pylint filelock pymodbus==2.5.3
 
     - name: Run Pylint on all Python scripts
       run: pylint --disable=E0401 $(find . -name "*.py")

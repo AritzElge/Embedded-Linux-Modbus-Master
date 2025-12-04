@@ -16,7 +16,6 @@ Note:
     Designed for use with polling_daemon.py and slaves.json configuration.
 """
 
-import os
 from datetime import datetime
 from filelock import FileLock
 from pymodbus.client.sync import ModbusTcpClient

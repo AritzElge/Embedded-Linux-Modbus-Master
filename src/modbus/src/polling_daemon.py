@@ -48,7 +48,8 @@ def run_polling_daemon():
     # Process each device. The function called internally uses the hardware mutex.
     for device in devices:
         if device.get("type") == "sensor":
-            print(f"Calling get_sensor_reg for {device['label']} (will use hardware mutex internally)...")
+            print(f"Calling get_sensor_reg for {device['label']} "
+            f("(will use hardware mutex internally)...")
             get_sensor_reg(device["label"], device["ip"], device["port"], device["length"])
 
 if __name__ == "__main__":

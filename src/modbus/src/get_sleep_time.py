@@ -21,7 +21,7 @@ def calculate_sleep_time():
                 schedule_data = json.load(f)
         except (FileNotFoundError, json.JSONDecodeError) as err:
             print(f"Error reading schedule file: {err}", file=sys.stderr)
-            print(3600) 
+            print(3600)
             sys.exit(0)
 
         # Logic to find the closest event in the future
@@ -52,5 +52,5 @@ def calculate_sleep_time():
 
 
 if __name__ == "__main__":
-    # Essential block to ensure the script runs when executed
+    '''Main execution point for the sleep time calculator'''
     calculate_sleep_time()
