@@ -17,7 +17,7 @@ This directory contains the detailed technical documentation, specifications, an
 ## 2. System Architecture
 
 *   [Data Flow Diagram and Software Architecture](architecture_diagram.pdf)
-*   [Hardware Connection Schematic (SPI Pinout)](hardware_schematic.png)
+*   [Hardware Connection Schematic (SPI Pinout)](hardware_schematic.pdf)
 
 ## 3. Operational Manuals and Procedures
 
