@@ -16,16 +16,16 @@ The process involves the following steps:
 ## Generating the Update Package
 This step is performed on the Host PC after local compilation with `./setup.sh`:
 1.  Navigate to the output directory where Buildroot stores the generated packages:
-    '''
+    ```
     cd output/images/ipk_packages/
-    '''
+    ```
 2.  Locate the specific version .ipk file you wish to deploy (example: `ELI-galileo-v1.0.0.ipk`).
 
 ## Preparing the USB Pendrive
 1.  Copy the generated `.ipk` package to the root directory of the USB drive:
-    '''
+    ```
     cp ELI-galileo-vX.Y.Z.ipk /media/user/MY_USB/
-    '''
+    ```
 2.  **Important:** The update script automatically searches for `.ipk` files in the root directory of the USB drive. Do not place them in subfolders.
 3.  Safely eject the pendrive from the Host PC.
 
@@ -43,9 +43,9 @@ The update script performs the following security checks sequentially:
 ## Monitoring and Post-Update Verification
 1.  **Physical Monitoring:** The status LED will blink rapidly during the installation process. It will return to the normal 1Hz heartbeat when the update is successful or if an error occurs.
 2.  **Remote Monitoring (SSH):** If the network is available, you can monitor the progress and outcome of the update in the logs:
-    '''
+    ```
     tail -f /mnt/hdd/logs/system.log
-    '''
+    ```
 3.  **System Reboot:** A full reboot of the board is required for all changes to take effect and for the new daemons to start correctly.
 4.  **Final Confirmation:** After the reboot, verify the new software version via SSH or the LCD screen (if the interface allows).
 

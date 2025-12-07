@@ -25,23 +25,23 @@ For detailed diagnostics, use SSH to access the system via the Management IP (co
 
 ### Checking Daemon Status
 Use systemctl commands to interact with individual services:
-'''
+```
 # Check status of the polling daemon
 systemctl status domotica-polling-daemon
 
 # Restart a failed daemon
 systemctl restart domotica-polling-daemon
-'''
+```
 
 ### Analyzing Logs
 Logs are stored persistently on the external HDD in /mnt/hdd/logs/. Use standard Linux tools for analysis:
-'''
+```
 # View real-time logs for the modbus system
 tail -f /mnt/hdd/logs/modbus.log
 
 # Search for specific errors in system logs
 grep "ERROR" /mnt/hdd/logs/system.log
-'''
+```
 
 ### Disaster Recovery Procedures
 In the event of an unrecoverable software error (e.g., kernel panic, system bricked during update), refer to the manual re-flashing procedure detailed in the Initial Deployment Guide.

@@ -148,7 +148,7 @@ A detailed specification of the system requirements can be found in the document
 3.  **Flash the Image to MicroSD**
     Once the `sdcard.img` is generated, use a tool like dd (Linux/macOS) or Balena Etcher (all OSes) to flash the image onto your MicroSD card.
     ```
-    # Example using dd (ensure you replace 'sdx' with your actual SD card device)
+    # Example using dd (ensure you replace `sdx` with your actual SD card device)
     sudo dd if=sdcard.img of=/dev/sdx bs=4M status=progress
     ```
     *(Note: The application software expects a secondary USB-HDD to be connected to the Galileo board upon boot for logging and primary OS functionality.)*
