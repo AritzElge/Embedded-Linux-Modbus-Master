@@ -20,7 +20,7 @@ set_status() {
     mkdir -p /tmp/status/ # Ensure status directory exists
     exec 9>"$STATUS_FILE"
     flock -n 9 || { echo "ERROR: Could not lock daemon status file." >> /dev/kmsg; return 1; }
-    echo -n "$1" >&9 
+    printf "%s" "$1" >&9 
     exec 9>&-    
     return 0
 }

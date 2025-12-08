@@ -11,7 +11,7 @@ get_highest_error() {
     for status_file in "$STATUS_DIR"*.status; do
         if [ -f "$status_file" ]; then
             # Read the file content into a variable using a pipe and subshell
-            CURRENT_ERROR=$(cat "$status_file" | tr -d '\n')
+            CURRENT_ERROR=$(tr -d '\n' < "$status_file")
             
             # Compare and save the highest error
             if [ "$CURRENT_ERROR" -gt "$HIGHEST_ERROR" ]; then
