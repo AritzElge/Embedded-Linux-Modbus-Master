@@ -10,6 +10,8 @@ manages the hardware lock internally.
 import os
 import json
 import datetime
+import sys  # Import sys for potential future use (e.g. sys.exit())
+
 # Get the absolute path of the directory where this script is located
 script_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -19,6 +21,7 @@ if script_dir not in sys.path:
 
 from modbus_client import set_actuator_reg
 from filelock import FileLock
+# -----------------------------------------------------------
 
 # Mutex to protect the schedule.json file
 SCHEDULE_JSON_LOCK = "/tmp/schedule_app.lock"
