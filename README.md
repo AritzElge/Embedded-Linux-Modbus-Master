@@ -187,7 +187,7 @@ The project is currently in active development. Below are the goals for upcoming
     - [x] Implement basic MODBUS control
     - [x] Implement basic MODBUS data polling
     - [x] Implement basic MODBUS scheduled actions.
-    - [ ] Implement HDD-USB mounting and daily-logging daemon
+    - [X] Implement HDD-USB mounting and daily-logging daemon
     - [ ] `ipk` package management for Robust Field Updates
     - [ ] Automated Build Reproducibility via `.defconfig` integration
     - [ ] Implement **automated Unit Testing** (e.g., Pytest for Python modules)
