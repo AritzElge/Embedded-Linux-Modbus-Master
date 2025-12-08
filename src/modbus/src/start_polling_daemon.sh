@@ -54,7 +54,7 @@ while true; do
 
     if [ $EXIT_CODE -ne 0 ]; then
         echo "ERROR: polling_daemon.py exited with code $EXIT_CODE." >> /dev/kmsg
-        set_status 3 # Error Code 3: Daemon process failure
+        set_status 2 # Error Code 3: Daemon process failure
     else 
         set_status 0 # Success: Reset status to OK if the execution was clean
     fi

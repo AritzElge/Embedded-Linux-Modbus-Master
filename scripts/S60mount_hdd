@@ -5,10 +5,12 @@
 MOUNT_POINT="/mnt/hdd"
 # CONFIRM THIS IS YOUR DEVICE NAME IN THE GALILEO (usually sda1)
 DEVICE_NAME="/dev/sda1"
-STATUS_FILE="/tmp/system_status.txt"
+STATUS_FILE="/tmp/status/system_status.txt"
 
 # --- Helper Function: Safely write system status using flock ---
 set_status() {
+    mkdir -p /tmp/
+    mkdir -p /tmp/status/
     exec 9>"$STATUS_FILE"
     flock -n 9 || { echo "ERROR: Could not lock status file." >> /dev/kmsg; return 1; }
     echo -n "$1" >&9 
@@ -30,7 +32,7 @@ if [ $? -eq 0 ]; then
     set_status 0 # Success: Set OK status
 else
     echo "ERROR: Failed to mount the device $DEVICE_NAME." >> /dev/kmsg
-    set_status 1 # Error: Set error code 1 (HDD mount failure)
+    set_status 10 # Error: Set error code 1 (HDD mount failure)
 fi
 
 # --- 3. Create expected directories if the mount was successful ---

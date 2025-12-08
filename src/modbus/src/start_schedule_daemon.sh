@@ -57,7 +57,7 @@ while true; do
     if [ $ACTION_EXIT_CODE -ne 0 ] || [ $GET_TIME_EXIT_CODE -ne 0 ]; then
         # If either script failed, report the single error code 4 (E04)
         echo "ERROR: A schedule script failed (Action Code: $ACTION_EXIT_CODE, GetTime Code: $GET_TIME_EXIT_CODE)." >> /dev/kmsg
-        set_status 4 
+        set_status 3 
         
         # Default sleep to avoid tight loop on crash
         SLEEP_SECONDS=300 # Sleep for 5 minutes on error

@@ -1,22 +1,29 @@
-#include <stdio.h>    // Permitido en POSIX/Linux user-space
-#include <unistd.h>   // Funciones POSIX como usleep()
-#include <time.h>     // Funciones POSIX como time() y difftime()
-#include <mraa/gpio.h>
-#include <mraa/common.h>
+#include <stdio.h>    // POSIX/Linux file I/O (printf, stderr, fopen, fscanf)
+#include <unistd.h>   // POSIX functions (sleep())
+#include <time.h>     // POSIX functions (nanosleep(), struct timespec)
+#include <mraa/gpio.h> // MRAA GPIO library
+#include <mraa/common.h> // MRAA common definitions
+#include <fcntl.h>    // POSIX file control (open, read)
+#include <sys/stat.h> // POSIX file stats (open, read)
+#include <dirent.h>   // POSIX directory handling (opendir, readdir)
+#include <string.h>   // Standard C string handling
+#include <stdlib.h>   // Standard C library (atoi, exit)
+#include <limits.h>   // INCLUDE THIS HEADER TO USE PATH_MAX/NAME_MAX
 
-// Time definitions in microseconds (usleep)
+// Time definitions
 #define T_SHORT_S  0L
-#define T_SHORT_NS 200000000// Short Blink
+#define T_SHORT_NS 200000000 // Short Blink (200ms)
 #define T_LONG_S   0L
-#define T_LONG_NS  600000000// Long Blink
-#define T_OFF_SYNC 2        // Long synchronization pause
-#define T_ON_HEARTBEAT 100000000   // On time for heartbeat blink
-#define T_OFF_HEARTBEAT 900000000  // OFF time for heartbeat blink
+#define T_LONG_NS  600000000 // Long Blink (600ms)
+#define T_OFF_SYNC 2         // Long synchronization pause (2 seconds)
+#define T_ON_HEARTBEAT 100000000   // On time for heartbeat blink (100ms)
 
-// MUX GPIO pinout
-#define IO_EXP_MUX_SEL1 30  // I/O Expander MUX Select 1
-#define IO_EXP_MUX_SEL2 31  // I/O Expander MUX Select 2
-#define QUARK_GPIO_46   46  // Quark GPIO 46
+#define STATUS_DIR "/tmp/status/"  // Directory containing daemon status files
+
+// MUX GPIO pinout (Configured in main)
+#define IO_EXP_MUX_SEL1 30  
+#define IO_EXP_MUX_SEL2 31  
+#define QUARK_GPIO_46   46  
 
 // -- Function Prototypes (Declarations) --
 int get_operation_status(void);
@@ -28,24 +35,61 @@ int configure_gpio_output_raw(mraa_gpio_context gpio_pin);
 // -- Function Implementations (Definitions) --
 
 /** int get_operation_status()
- * @brief Stub function that will return the actual error code
- * @return An integer (e.g.: 0=OK, 1=SPI Error, 2=Modbus Error, 3=Memory Error)
+ * @brief Reads status files in /tmp/status/ and returns the highest error code.
+ * @return An integer (0=OK, >0=Error code). Returns 15 if status dir not found.
  */
 int get_operation_status()
 {
-    // Warning!!!No error detection implemented yet!!!
-    return 0; // Simulation: OK=0
+    DIR *d;
+    struct dirent *dir;
+    int highest_error = 0;
+    
+    d = opendir(STATUS_DIR);
+    if (d) {
+        while ((dir = readdir(d)) != NULL) {
+            // Skip "." and ".." directory entries
+            if (strcmp(dir->d_name, ".") == 0 || strcmp(dir->d_name, "..") == 0) {
+                continue;
+            }
+
+            char path[PATH_MAX]; 
+            snprintf(path, sizeof(path), "%s%s", STATUS_DIR, dir->d_name);
+            
+            FILE *fp = fopen(path, "r");
+            if (fp != NULL) {
+                // Use fscanf to read an integer number (can be multiple digits)
+                int status_code = 0;
+                if (fscanf(fp, "%d", &status_code) == 1) {
+                    if (status_code > highest_error) {
+                        highest_error = status_code;
+                    }
+                }
+                // If fscanf fails to read a number, it skips the comparison logic.
+                fclose(fp);
+            } else {
+                fprintf(stderr, "ERROR: Could not open status file %s\n", path);
+                // Error 15 now indicates "Cannot read status file"
+                if (highest_error == 0) highest_error = 15; 
+            }
+        }
+        closedir(d);
+    } else {
+        fprintf(stderr, "WARNING: Status directory %s not found.\n", STATUS_DIR);
+        // Error 15 also for "Status directory missing"
+        return 15; 
+    }
+
+    return highest_error;
 }
 
-/** void do_blink(mraa_gpio_context gpio_pin, int duration)
- * @brief Performs a single blink (on/off) with a specific duration
- * @param gpio_pin The MRAA GPIO context for the pin being used
- * @param duration Duration of the ON state and a short OFF state
- */
+
+// The rest of the functions (do_blink, blink_error_code, configure_gpio_output_raw) 
+// remain exactly the same as your original code.
+
 void do_blink(mraa_gpio_context gpio_pin, int seconds, int nanoseconds)
 {
     struct timespec ts_on = { .tv_sec = seconds, .tv_nsec =nanoseconds };
-    struct timespec ts_off = { .tv_sec = T_SHORT_S, .tv_nsec = T_SHORT_NS };
+    struct timespec ts_off = { .tv_sec = T_SHORT_S, .tv_nsec = T_SHORT_NS }; 
 
     mraa_gpio_write(gpio_pin, 1);
     nanosleep(&ts_on, NULL);
@@ -53,16 +97,13 @@ void do_blink(mraa_gpio_context gpio_pin, int seconds, int nanoseconds)
     nanosleep(&ts_off, NULL);
 }
 
-/** void blink_error_code(mraa_gpio_context led_gpio_pin, int error_code)
- * @brief Blinks a binary error code using long/short blinks
- * @param led_gpio_pin The MRAA GPIO context for the LED pin
- * @param error_code The code to blink (only the first 8 bits)
- */
+// Function adjusted to only use 4 bits
 void blink_error_code(mraa_gpio_context led_gpio_pin, int error_code)
 {
     sleep(T_OFF_SYNC); 
 
-    for (int i = 7; i >= 0; i--)
+    // Iterate only 4 times (from 3 down to 0) instead of 8
+    for (int i = 3; i >= 0; i--) 
     {
         int bit = (error_code >> i) & 1;
 
@@ -76,14 +117,9 @@ void blink_error_code(mraa_gpio_context led_gpio_pin, int error_code)
         }
     }
     
-    sleep(T_OFF_SYNC);
+    // sleep(T_OFF_SYNC); This pause is now handled by the main sleep(1)
 }
 
-/** int configure_gpio_output_raw(mraa_gpio_context gpio_pin)
- * @brief Configures a GPIO pin context as an output
- * @param gpio_pin The MRAA GPIO context
- * @return 0 on success, or an MRAA error code (>0) on failure
- */
 int configure_gpio_output_raw(mraa_gpio_context gpio_pin)
 {
   mraa_result_t result = MRAA_SUCCESS;
@@ -91,13 +127,9 @@ int configure_gpio_output_raw(mraa_gpio_context gpio_pin)
   if (gpio_pin == NULL)
     { 
         fprintf(stderr, "MRAA Init Error. Check configuration.\n");
-        if (result == 0)
-        {
-          return 99;
-        }
+        return 99; 
     }
 
-    // We capture result from mraa_gpio_dir
     result = mraa_gpio_dir(gpio_pin, MRAA_GPIO_OUT);
 
     if (result != MRAA_SUCCESS)
@@ -112,44 +144,49 @@ int configure_gpio_output_raw(mraa_gpio_context gpio_pin)
 
 int main()
 {
-    int status = 0; // 0 for OK and >0 for error
-
+    // Initialize MRAA library and configure MUX (your original main logic)
     mraa_init();
+    int mux_gpio[] = {IO_EXP_MUX_SEL1, IO_EXP_MUX_SEL2, QUARK_GPIO_46}; 
+    for (int i_gpio = 0; i_gpio < 3; i_gpio++)
     {
-      int mux_gpio[3] = {IO_EXP_MUX_SEL1, IO_EXP_MUX_SEL2, QUARK_GPIO_46};
-      for (int i_gpio = 0; i_gpio < 3; i_gpio++)
-      {
         mraa_gpio_context mux_gpio_pin = mraa_gpio_init_raw(mux_gpio[i_gpio]);
         if (0 != configure_gpio_output_raw(mux_gpio_pin))
         {
-          return 1;
+            return 1;
         }
         mraa_gpio_write(mux_gpio_pin, 0);
-      }
     }
+
     mraa_gpio_context led_gpio_pin = mraa_gpio_init_raw(7);
-    configure_gpio_output_raw(led_gpio_pin);
+    if (0 != configure_gpio_output_raw(led_gpio_pin))
+    {
+        return 1;
+    }
     
-    // Main loop: Uses status for correct operation or error code
+    // Main loop: Continuously check status and blink
     while(1)
     {
-        if (status == 0)
+        int current_status = get_operation_status(); 
+
+        if (current_status == 0)
 	{
-	    struct timespec ts_on = { .tv_sec = 0L, .tv_nsec = T_ON_HEARTBEAT };
-	    struct timespec ts_off = { .tv_sec = 0L, .tv_nsec = T_OFF_HEARTBEAT };
-            // OK Status: Heatbeat activated
+            // OK Status: Heartbeat activated
+            struct timespec ts_on = { .tv_sec = 0L, .tv_nsec = T_ON_HEARTBEAT };
             mraa_gpio_write(led_gpio_pin, 1);
             nanosleep(&ts_on, NULL);
             mraa_gpio_write(led_gpio_pin, 0);
-            nanosleep(&ts_off, NULL);
+            // The long pause is handled by the main sleep(1) outside the if/else
         }
         else
         {
-            // Error status
-            blink_error_code(led_gpio_pin, status);
+            // Error status: Blink the code
+            blink_error_code(led_gpio_pin, current_status);
+            // The long pause is handled by the main sleep(1) outside the if/else
         }
+        
+        // Main loop pause of 1 second to control the frequency of the loop
+        sleep(1);
     }
 
     return 0;
 }
-
