@@ -66,7 +66,7 @@ def run_polling_daemon():
 
     # Define the CSV headers (adjust these field names to match your data structure)
     fieldnames = ['timestamp', 'label', 'ip', 'port', 'length', 'value']
-    
+
     # Open the file in 'a' (append) mode. It creates the file if it doesn't exist.
     # Add encoding='utf-8' for W1514 fix
     with open(target_csv, mode='a', newline='', encoding='utf-8') as csv_file:

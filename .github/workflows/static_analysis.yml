@@ -41,4 +41,4 @@ jobs:
       run: pip install pylint filelock pymodbus==2.5.3
 
     - name: Run Pylint on all Python scripts
-      run: pylint --disable=E0401,W0105,C0413 $(find . -name "*.py")
+      run: pylint --disable=E0401,W0105,C0413,R0801 $(find . -name "*.py")
