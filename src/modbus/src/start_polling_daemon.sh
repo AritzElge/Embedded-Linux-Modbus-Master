@@ -3,12 +3,17 @@
 # Runs continuously to manage data polling every 15 minutes and reports its status.
 
 MOUNT_POINT="/mnt/hdd"
+
+# --- DEFINITION OF ABSOLUTE PATHS ---
+# We assume this script is in /usr/bin/ in the final image
+ACTION_SCRIPT="/mnt/hdd/daemons/modbus/polling_daemon.py"
+# ----------------------------------------------------
+
 LOG_DIR="$MOUNT_POINT/logs"
 LOG_FILE="$LOG_DIR/modbus.log"
 ERROR_LOG_FILE="$LOG_DIR/error.log"
-# This is the specific status file for this daemon
 STATUS_FILE="/tmp/status/polling_daemon.status" 
-SYSTEM_STATUS_FILE="/tmp/system_status.txt" # Status file from mount_hdd.sh
+SYSTEM_STATUS_FILE="/tmp/status/system_status.txt" 
 
 # --- Helper Function: Safely write daemon status using flock ---
 set_status() {
@@ -26,10 +31,10 @@ set_status 0 # Assume healthy initially
 # --- Main loop to manage the daemon's lifecycle ---
 while true; do
 
-    # --- VERIFY EXISTENCE OF THE PYTHON SCRIPT ---
-    if [ ! -f "polling_daemon.py" ]; then
-        echo "ERROR: polling_daemon.py not found in current directory." >> /dev/kmsg
-        set_status 127 # Error Code 127: Command not found
+    # --- VERIFY EXISTENCE OF THE PYTHON SCRIPT USING ABSOLUTE PATH ---
+    if [ ! -f "$ACTION_SCRIPT" ]; then
+        echo "ERROR: polling_daemon.py not found at $ACTION_SCRIPT." >> /dev/kmsg
+        set_status 3 # Error Code 3: Daemon script not found/failed to run
         sleep 900 # Sleep 15 minutes before retrying
         continue # Return to the start of the while true loop
     fi
@@ -39,14 +44,14 @@ while true; do
     if grep -qs "$MOUNT_POINT" /proc/mounts; then
         # HDD is mounted. Use full paths for logging.
         mkdir -p "$LOG_DIR"
-        python polling_daemon.py >> "$LOG_FILE" 2>> "$ERROR_LOG_FILE"
+        python "$ACTION_SCRIPT" >> "$LOG_FILE" 2>> "$ERROR_LOG_FILE"
     else
         # HDD is NOT mounted. Log to temporary storage (/tmp)
         echo "WARNING: HDD not mounted. Logging to /tmp/." >> /dev/kmsg
-        if [ "$(cat $SYSTEM_STATUS_FILE)" = "1" ]; then
+        if [ "$(cat "$SYSTEM_STATUS_FILE")" = "10" ]; then
              echo "SYSTEM ERROR: HDD mount failed at boot." >> /dev/kmsg
         fi
-        python polling_daemon.py >> /tmp/modbus.log 2>> /tmp/error.log
+        python "$ACTION_SCRIPT" >> /tmp/modbus.log 2>> /tmp/error.log
     fi
 
     # 2. Check the exit code of the Python script
@@ -54,7 +59,7 @@ while true; do
 
     if [ $EXIT_CODE -ne 0 ]; then
         echo "ERROR: polling_daemon.py exited with code $EXIT_CODE." >> /dev/kmsg
-        set_status 2 # Error Code 3: Daemon process failure
+        set_status 3 # Error Code 3: Daemon process failure
     else 
         set_status 0 # Success: Reset status to OK if the execution was clean
     fi
@@ -62,4 +67,3 @@ while true; do
     # 3. Wait 15 minutes before the next execution
     sleep 900
 done
-

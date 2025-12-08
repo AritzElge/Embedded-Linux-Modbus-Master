@@ -35,7 +35,7 @@ CFLAGS := -Wall -Wextra -std=c99 -O2 -D_POSIX_C_SOURCE=200809L
 SRCS := $(wildcard src/*.c)
 
 # Define the name of the final executable target
-TARGET := gpio_misra_test_app
+TARGET := error_code_blink
 
 # --------------------------------------------------
 # Build Rules 

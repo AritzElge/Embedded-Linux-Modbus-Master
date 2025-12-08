@@ -1,0 +1,40 @@
+#!/bin/sh
+
+# S71polling_daemon: Launches polling daemon with failover logic.
+
+# Binary paths
+HDD_BLINK_BINARY="/mnt/hdd/daemons/modbus/start_polling_daemon.sh"
+SD_BLINK_BINARY="/usr/bin/start_polling_daemon.sh"
+LOG_FILE="/dev/kmsg" # Kernel log for boot messages
+
+# --- Function to write log messages ---
+log_message() {
+    echo "S71polling_daemon: $1" >> "$LOG_FILE"
+}
+
+# --- 1. Attempt to start the Polling Daemon from the HDD (Primary location) ---
+if [ -f "$HDD_BLINK_BINARY" ]; then
+    log_message "INFO: HDD mounted. Starting polling_daemon.py  from HDD."
+    # Execute in the background
+    "$HDD_BLINK_BINARY" &
+    PID=$!
+    log_message "INFO: polling_daemon.py  (HDD) started with PID $PID."
+
+# --- 2. If the binary is not on the HDD, check the internal SD (Failover location) ---
+elif [ -f "$SD_BLINK_BINARY" ]; then
+    log_message "WARNING: Polling daemon not found on HDD. Starting from SD backup (/usr/bin/)."
+    # Execute in the background
+    "$SD_BLINK_BINARY" &
+    PID=$!
+    log_message "INFO: polling_daemon.py (SD) started with PID $PID."
+
+# --- 3. If the binary is not found anywhere, report a critical error ---
+else
+    log_message "CRITICAL ERROR: polling_daemon.py not found on HDD or SD."
+    # Write an error 15 (Polling daemon internal failure)
+    echo -n "2" > /tmp/status/system_status.txt
+fi
+
+log_message "INFO: S71polling_daemon finished execution."
+
+exit 0

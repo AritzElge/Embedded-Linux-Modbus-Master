@@ -10,12 +10,19 @@ manages the hardware lock internally.
 import os
 import json
 import datetime
+# Get the absolute path of the directory where this script is located
+script_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Add this directory to Python's module search path (sys.path)
+if script_dir not in sys.path:
+    sys.path.append(script_dir)
+
 from modbus_client import set_actuator_reg
 from filelock import FileLock
 
 # Mutex to protect the schedule.json file
 SCHEDULE_JSON_LOCK = "/tmp/schedule_app.lock"
-SCHEDULE_FILE = "schedule.json"
+SCHEDULE_FILE = "/mnt/hdd/daemons/modbus/schedule.json"
 
 def read_and_execute_scheduled_events_with_window():
     """

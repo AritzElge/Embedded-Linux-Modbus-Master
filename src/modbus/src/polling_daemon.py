@@ -2,6 +2,13 @@ import os
 import json
 import csv # Standard Python library
 import time
+# Get the absolute path of the directory where this script is located
+script_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Add this directory to Python's module search path (sys.path)
+if script_dir not in sys.path:
+    sys.path.append(script_dir)
+
 from filelock import FileLock
 from modbus_client import get_sensor_reg # Assumed to return data
 
