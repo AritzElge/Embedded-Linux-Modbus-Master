@@ -1,0 +1,4 @@
+config BR2_PACKAGE_ELI_GALILEO
+    bool "ELI_galileo software suite"
+    help
+      Contains all custom software for the Galileo project (C binary, scripts, JSON).
