@@ -7,17 +7,26 @@ BUILDROOT_DIR="./galileo/buildroot"
 EXTERNAL_DIR="./src"
 # --------------------------
 
-echo "Starting Buildroot compilation with BR2_EXTERNAL..."
+echo "Starting process using absolute paths..."
+
+# Calculate the absolute path of the external directory
+# This converts ./src into something like /home/user/project/src
+ABSOLUTE_EXTERNAL_PATH="$(pwd)/$EXTERNAL_DIR"
+
+echo "Using absolute path for BR2_EXTERNAL: $ABSOLUTE_EXTERNAL_PATH"
 
 # Navigate into the Buildroot directory
 cd "$BUILDROOT_DIR" || exit
 
-# Clean and compile, passing the external path relative to *this* directory (galileo/buildroot)
-# We assume $EXTERNAL_DIR is one level up (../../) and parallel to galileo/buildroot
+# Clean and regenerate the configuration
 make clean
-make BR2_EXTERNAL="../../$EXTERNAL_DIR" all
+# Pass the ABSOLUTE PATH to both make defconfig and make all
+make BR2_EXTERNAL="$ABSOLUTE_EXTERNAL_PATH" defconfig
+
+# Compile
+make BR2_EXTERNAL="$ABSOLUTE_EXTERNAL_PATH" all
 
 # Return to the original directory
 cd -
 
-echo "Process completed."
+echo "Process completed successfully."
