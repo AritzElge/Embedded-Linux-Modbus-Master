@@ -14,7 +14,7 @@ mkdir -p "$OVERLAY_PATH" || exit 1
 cp -v "${SCRIPTS_PATH}"/S60mount_hdd "${OVERLAY_PATH}"/S60mount_hdd || exit 1
 cp -v "${SCRIPTS_PATH}"/S61error_blink_daemon "${OVERLAY_PATH}"/S61error_blink_daemon || exit 1
 cp -v "${SCRIPTS_PATH}"/S71polling_daemon "${OVERLAY_PATH}"/S71polling_daemon || exit 1
-cp -v "${SCRIPTS_PATH}"/S72schedule_daemon "${OVERLAY_PATH}"S72schedule_daemon || exit 1
+cp -v "${SCRIPTS_PATH}"/S72schedule_daemon "${OVERLAY_PATH}"/S72schedule_daemon || exit 1
 
 # VERY IMPORTANT: Ensure execute permissions
 chmod +x "${OVERLAY_PATH}"/S60mount_hdd || exit 1
