@@ -25,7 +25,7 @@ from filelock import FileLock
 
 # Mutex to protect the schedule.json file
 SCHEDULE_JSON_LOCK = "/tmp/schedule_app.lock"
-SCHEDULE_FILE = "/mnt/hdd/daemons/modbus/schedule.json"
+SCHEDULE_FILE = "/usr/bin/schedule.json"
 
 def read_and_execute_scheduled_events_with_window():
     """

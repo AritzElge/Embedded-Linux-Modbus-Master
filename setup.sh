@@ -1,53 +1,71 @@
 #!/bin/bash
 
 # --- Script Configuration ---
-BUIDLROOT_VERSION=2019.02
+BUILDROOT_VERSION=2019.02
 REPO_URL="git://git.buildroot.net/buildroot.git"
+# Define the project root as an absolute, immutable path
+PROJECT_ROOT=$(pwd) 
 
-# Install Buildroot dependencies
+# Define absolute paths for robustness
+BUILDROOT_DIR="$PROJECT_ROOT/galileo/buildroot"
+SCRIPTS_DIR="$PROJECT_ROOT/scripts"
 
-sudo ./scripts/install_dependencies.sh
+echo "[INFO] Starting setup script from $PROJECT_ROOT"
+
+# Install Buildroot dependencies (assuming this script is robust)
+sudo "$SCRIPTS_DIR/install_dependencies.sh"
 EXIT_STATUS=$?
 
-# Controll return from script
 if [ $EXIT_STATUS -ne 0 ]; then
-	echo "[ERROR] The dependency installation script failed (Exit Status: 1)"
-	echo "[ERROR] Cannot proceed with Buildroot setup. Exiting"
-	exit 1
+    echo "[ERROR] Dependency installation failed. Exiting."
+    exit 1
 fi
+echo "[INFO] Dependency installation finished successfully."
 
-echo "[INFO] Dependency installation finished successfully. Proceeding with Buildroot setup."
+# -- Step 1 & 2: Clone/Update repository and checkout version --
+mkdir -p "$BUILDROOT_DIR"
+cd "$BUILDROOT_DIR" || exit 1
 
-# Change directory to ensure the scripts runs from the galileo-master/ root
-cd "$(dirname "$0")" || exit 1
-
-echo " Starting Buildroot download for Galileo Gen 2"
-mkdir galileo || exit 1
-cd galileo || exit 1
-# -- Step1: Clone the Buildroot repository --
 if [ ! -d ".git" ]; then
-	echo "[INFO] .git directory not found. Cloning repository..."
-	if git clone "$REPO_URL"; then
-		echo "[INFO] Cloning completed successfully."
-	else
-		echo "[ERROR] Failed during repository cloning. Exiting."
-		exit 1
-	fi
+    echo "[INFO] Cloning repository into $BUILDROOT_DIR..."
+    git clone "$REPO_URL" . || exit 1
 else
-	echo "[INFO] Repository already cloned. Skipping cloning step"
+    echo "[INFO] Repository already cloned. Updating and checking out version..."
 fi
 
-# -- Step 2: Switch to the specific version (tag) --
-echo "[INFO] Switching to the specific version (tag): 2019.02"
-cd buildroot || exit 1
-if git checkout "${BUIDLROOT_VERSION}"; then
-	echo "[INFO] Checkout completed successfully. version 2019.02 selected."
-else
-	echo "[ERROR] Failed to checkout version 2019.02, Exiting."
-	exit 1
-fi
+echo "[INFO] Switching to version: $BUILDROOT_VERSION"
+git checkout "${BUILDROOT_VERSION}" || exit 1
+echo "Buildroot repository ready at $BUILDROOT_DIR"
 
-echo "Buildroot configuration complete."
-echo "Now, run 'make galileo_defconfig' , 'make menuconfig', 'make linux-menuconfig' and 'make' in the 'buildroot/' directory."
+# --- Project Configuration and Compilation ---
 
+# Return to the project root to run the scripts
+cd "$PROJECT_ROOT" || exit 1
+
+echo "Copying init.d Scripts to overlay..."
+# Pass PROJECT_ROOT to the script so it uses absolute paths internally
+"$SCRIPTS_DIR/copy_init_scripts.sh" "$PROJECT_ROOT" || exit 1
+
+echo "Copying .config to buildroot directory..."
+cp "./.config" "$BUILDROOT_DIR/.config" || exit 1
+
+echo "STEP 1: Compiling buildroot for C and C++ toolchain generation..."
+cd "$BUILDROOT_DIR" || exit 1
+make -j$(($(nproc) - 1))
+cd "$PROJECT_ROOT" || exit 1
+
+echo "STEP 2: Compiling C daemons..."
+# Pass PROJECT_ROOT and BUILDROOT_DIR to the C compilation script
+"$SCRIPTS_DIR/compile_daemons.sh" "$PROJECT_ROOT"  || exit 1
+
+echo "STEP 3: Copying daemons to overlay..."
+# Pass PROJECT_ROOT to the daemon copy script
+"$SCRIPTS_DIR/copy_daemons.sh" "$PROJECT_ROOT"  || exit 1
+
+echo "STEP 4: Final Buildroot compilation..."
+cd "$BUILDROOT_DIR" || exit 1
+make -j$(($(nproc) - 1)) all
+cd "$PROJECT_ROOT" || exit 1
+
+echo "Build process finished successfully."
 exit 0

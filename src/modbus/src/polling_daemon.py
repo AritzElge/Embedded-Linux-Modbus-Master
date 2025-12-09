@@ -24,7 +24,7 @@ from modbus_client import get_sensor_reg # Assumed to return data
 
 # Mutex to protect the sensors.json file
 SENSORS_JSON_LOCK = "/tmp/sensors_app.lock"
-SENSORS_FILE = "/mnt/hdd/daemons/modbus/sensors.json"
+SENSORS_FILE = "/usr/bin/sensors.json"
 
 # Define the primary location for the CSV file (on the HDD)
 CSV_FILE_PATH = "/mnt/hdd/logs/sensor_readings.csv"

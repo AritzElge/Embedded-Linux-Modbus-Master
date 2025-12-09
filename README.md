@@ -188,12 +188,12 @@ The project is currently in active development. Below are the goals for upcoming
     - [x] Implement basic MODBUS data polling
     - [x] Implement basic MODBUS scheduled actions.
     - [X] Implement HDD-USB mounting and daily-logging daemon
-    - [ ] `ipk` package management for Robust Field Updates
-    - [ ] Automated Build Reproducibility via `.defconfig` integration
+    - [ ] Automated Build Reproducibility via `.config` integration
+    - [ ] SD Card image generation via `./setup.sh` script
     - [ ] Implement **automated Unit Testing** (e.g., Pytest for Python modules)
 
 - **Version 1.0 (Q1 2026): Initial Release**
-    - [ ] SD Card image generation via `./setup.sh` script
+    - [ ] `ipk` package management for Robust Field Updates
     - [ ] Implement secure SSH access (key-only authentication, disabled root password)
     - [ ] Configure static ARP tables and iptables firewall rules
     - [ ] Reliability Target: Implement automatic system health-check and watchdog service
