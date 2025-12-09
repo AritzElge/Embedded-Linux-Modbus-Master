@@ -10,7 +10,7 @@ manages the hardware lock internally.
 import os
 import json
 import datetime
-import sys  # Import sys for potential future use (e.g. sys.exit())
+import sys
 
 # Get the absolute path of the directory where this script is located
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -76,7 +76,7 @@ def read_and_execute_scheduled_events_with_window():
                 entry["ip"],
                 entry["port"],
                 entry["register_address"],
-                entry["valor"]
+                entry["value"]
             )
     else:
         print("No events found scheduled within the last minute window.")

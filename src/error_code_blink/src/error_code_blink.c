@@ -1,21 +1,21 @@
-#include <stdio.h>    // POSIX/Linux file I/O (printf, stderr, fopen, fscanf)
-#include <unistd.h>   // POSIX functions (sleep())
-#include <time.h>     // POSIX functions (nanosleep(), struct timespec)
-#include <mraa/gpio.h> // MRAA GPIO library
+#include <stdio.h>       // POSIX/Linux file I/O (printf, stderr, fopen, fscanf)
+#include <unistd.h>      // POSIX functions (sleep())
+#include <time.h>        // POSIX functions (nanosleep(), struct timespec)
+#include <mraa/gpio.h>   // MRAA GPIO library
 #include <mraa/common.h> // MRAA common definitions
-#include <fcntl.h>    // POSIX file control (open, read)
-#include <sys/stat.h> // POSIX file stats (open, read)
-#include <dirent.h>   // POSIX directory handling (opendir, readdir)
-#include <string.h>   // Standard C string handling
-#include <stdlib.h>   // Standard C library (atoi, exit)
-#include <limits.h>   // INCLUDE THIS HEADER TO USE PATH_MAX/NAME_MAX
+#include <fcntl.h>       // POSIX file control (open, read)
+#include <sys/stat.h>    // POSIX file stats (open, read)
+#include <dirent.h>      // POSIX directory handling (opendir, readdir)
+#include <string.h>      // Standard C string handling
+#include <stdlib.h>      // Standard C library (atoi, exit)
+#include <limits.h>      // INCLUDE THIS HEADER TO USE PATH_MAX/NAME_MAX
 
 // Time definitions
 #define T_SHORT_S  0L
-#define T_SHORT_NS 200000000 // Short Blink (200ms)
+#define T_SHORT_NS 200000000       // Short Blink (200ms)
 #define T_LONG_S   0L
-#define T_LONG_NS  600000000 // Long Blink (600ms)
-#define T_OFF_SYNC 2         // Long synchronization pause (2 seconds)
+#define T_LONG_NS  600000000       // Long Blink (600ms)
+#define T_OFF_SYNC 2               // Long synchronization pause (2 seconds)
 #define T_ON_HEARTBEAT 100000000   // On time for heartbeat blink (100ms)
 
 #define STATUS_DIR "/tmp/status/"  // Directory containing daemon status files
@@ -83,9 +83,16 @@ int get_operation_status()
 }
 
 
-// The rest of the functions (do_blink, blink_error_code, configure_gpio_output_raw) 
-// remain exactly the same as your original code.
-
+/**
+ * @brief Toggles a GPIO pin state (ON/OFF sequence) with specific delays.
+ *
+ * This function turns the specified GPIO pin on for a defined duration (seconds/nanoseconds ON time), 
+ * then turns it off for a standard short duration (T_SHORT_S/T_SHORT_NS OFF time).
+ * 
+ * @param gpio_pin The MRAA GPIO context object representing the physical pin.
+ * @param seconds The number of seconds the pin should remain ON.
+ * @param nanoseconds The number of nanoseconds the pin should remain ON.
+ */
 void do_blink(mraa_gpio_context gpio_pin, int seconds, int nanoseconds)
 {
     struct timespec ts_on = { .tv_sec = seconds, .tv_nsec =nanoseconds };
@@ -97,7 +104,17 @@ void do_blink(mraa_gpio_context gpio_pin, int seconds, int nanoseconds)
     nanosleep(&ts_off, NULL);
 }
 
-// Function adjusted to only use 4 bits
+/**
+ * @brief Blinks a specific 4-bit error code sequence on a GPIO pin.
+ *
+ * This function takes an integer error code, processes its 4 least significant bits, 
+ * and translates each bit into a distinct blink pattern using do_blink(). 
+ * A '1' bit results in a long blink duration, while a '0' bit results in a short 
+ * blink duration. A synchronization delay occurs before the sequence starts.
+ *
+ * @param led_gpio_pin The MRAA GPIO context object representing the physical LED pin.
+ * @param error_code The integer value representing the error code to be signaled (only LSB 4 bits used).
+ */
 void blink_error_code(mraa_gpio_context led_gpio_pin, int error_code)
 {
     sleep(T_OFF_SYNC); 
@@ -116,10 +133,19 @@ void blink_error_code(mraa_gpio_context led_gpio_pin, int error_code)
             do_blink(led_gpio_pin, T_SHORT_S, T_SHORT_NS);
         }
     }
-    
-    // sleep(T_OFF_SYNC); This pause is now handled by the main sleep(1)
 }
 
+/**
+ * @brief Configures a given MRAA GPIO pin context for output direction.
+ *
+ * This function sets the specified GPIO pin direction to output mode using the 
+ * MRAA library. It performs basic validation to ensure the context object is valid
+ * before attempting configuration.
+ *
+ * @param gpio_pin The MRAA GPIO context object representing the physical pin.
+ * @return Returns 0 on success, 99 if the initial GPIO context is NULL, 
+ *         or an MRAA error code integer if setting the direction fails.
+ */
 int configure_gpio_output_raw(mraa_gpio_context gpio_pin)
 {
   mraa_result_t result = MRAA_SUCCESS;
@@ -146,15 +172,17 @@ int main()
 {
     // Initialize MRAA library and configure MUX (your original main logic)
     mraa_init();
-    int mux_gpio[] = {IO_EXP_MUX_SEL1, IO_EXP_MUX_SEL2, QUARK_GPIO_46}; 
-    for (int i_gpio = 0; i_gpio < 3; i_gpio++)
     {
-        mraa_gpio_context mux_gpio_pin = mraa_gpio_init_raw(mux_gpio[i_gpio]);
-        if (0 != configure_gpio_output_raw(mux_gpio_pin))
+        int mux_gpio[] = {IO_EXP_MUX_SEL1, IO_EXP_MUX_SEL2, QUARK_GPIO_46}; 
+        for (int i_gpio = 0; i_gpio < 3; i_gpio++)
         {
-            return 1;
+            mraa_gpio_context mux_gpio_pin = mraa_gpio_init_raw(mux_gpio[i_gpio]);
+            if (0 != configure_gpio_output_raw(mux_gpio_pin))
+            {
+                return 1;
+            }
+            mraa_gpio_write(mux_gpio_pin, 0);
         }
-        mraa_gpio_write(mux_gpio_pin, 0);
     }
 
     mraa_gpio_context led_gpio_pin = mraa_gpio_init_raw(7);

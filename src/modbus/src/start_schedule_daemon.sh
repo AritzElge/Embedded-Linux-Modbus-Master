@@ -6,7 +6,6 @@
 MOUNT_POINT="/mnt/hdd"
 
 # --- DEFINITION OF ABSOLUTE PATHS ---
-# We assume these scripts and binaries will be in /usr/bin/ in the final image
 GET_TIME_SCRIPT="/mnt/hdd/daemons/modbus/get_sleep_time.py"
 ACTION_SCRIPT="/mnt/hdd/daemons/modbus/schedule_daemon.py"
 # The set_status utility is defined as a helper function below

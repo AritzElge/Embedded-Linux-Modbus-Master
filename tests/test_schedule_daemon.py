@@ -30,9 +30,9 @@ class TestScheduleDaemon(unittest.TestCase):
         # The script's datetime.datetime.now() will now return 2025-12-10 10:30:15
 
         mock_schedule_json_data = json.dumps([
-            {"label": "Light1", "ip": "192.168.1.200", "port": 502, "register_address": 10, "valor": 1, "start_time": "10:30"}, # Should execute
-            {"label": "Light2", "ip": "192.168.1.201", "port": 502, "register_address": 10, "valor": 0, "start_time": "10:29"}, # Should execute (1 min ago)
-            {"label": "Heater", "ip": "192.168.1.202", "port": 502, "register_address": 10, "valor": 1, "start_time": "10:00"}  # Should NOT execute (too early)
+            {"label": "Light1", "ip": "192.168.1.200", "port": 502, "register_address": 10, "value": 1, "start_time": "10:30"}, # Should execute
+            {"label": "Light2", "ip": "192.168.1.201", "port": 502, "register_address": 10, "value": 0, "start_time": "10:29"}, # Should execute (1 min ago)
+            {"label": "Heater", "ip": "192.168.1.202", "port": 502, "register_address": 10, "value": 1, "start_time": "10:00"}  # Should NOT execute (too early)
         ])
         
         mock_json_file_handle = mock_open(read_data=mock_schedule_json_data)() 

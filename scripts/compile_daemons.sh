@@ -12,10 +12,8 @@ cd "$C_SOURCE_DIR" || { echo "[C_BUILD] Error: C source directory not found."; e
 echo "[C_BUILD] Running local make all..."
 make clean
 if make all; then
-    # El comando make all fue exitoso (código de salida 0)
     echo "[C_BUILD] C Daemon compilation finished successfully."
 else
-    # El comando make all falló (código de salida distinto de 0)
     echo "[C_BUILD] Error: C Daemon compilation failed."
     exit 1
 fi
