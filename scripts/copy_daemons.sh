@@ -23,9 +23,13 @@ cp -rv "${DAEMONS_PATH}"/ssh_app/* "${OVERLAY_USR_BIN_PATH}"/ || exit 1
 chmod +x "${OVERLAY_USR_BIN_PATH}"/monitor_status.sh || exit 1
 # 3. modbus daemons
 echo "[DAEMON_COPY] Copying modbus daemons..."
-cp -v "${DAEMONS_PATH}"/modbus/* "${OVERLAY_USR_BIN_PATH}"/ || exit 1
+cp -rv "${DAEMONS_PATH}"/modbus/src/* "${OVERLAY_USR_BIN_PATH}"/ || exit 1
 # Ensure execute permissions:
 chmod +x "${OVERLAY_USR_BIN_PATH}"/start_polling_daemon.sh || exit 1
 chmod +x "${OVERLAY_USR_BIN_PATH}"/start_schedule_daemon.sh || exit 1
+# Get the modules for pip to install
+echo "[DAEMON_COPY] Downloading Python wheels to cache..."
+mkdir -p "${OVERLAY_USR_BIN_PATH}"/python_packages || exit 1
+pip download filelock=3.8.0 six=1.17.0 pyserial=3.5 pymodbus=2.5.3 --dest "${OVERLAY_USR_BIN_PATH}"/python_packages  || exit 1
 
 echo "Copy completed."

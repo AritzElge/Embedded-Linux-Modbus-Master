@@ -3,7 +3,7 @@
 # --- Path Configuration ---
 PROJECT_ROOT=$1 # Capture argument 1
 
-C_SOURCE_DIR="$PROJECT_ROOT/src/error_supervisor_c"
+C_SOURCE_DIR="$PROJECT_ROOT/src/error_code_blink/"
 TOOLCHAIN_BIN_DIR="$BUILDROOT_DIR/output/host/bin"
 
 echo "[C_BUILD] Starting C daemon compilation (using internal Makefile paths)..."
