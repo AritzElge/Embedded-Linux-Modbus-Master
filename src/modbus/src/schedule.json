@@ -5,7 +5,7 @@
         "ip": "XXX.XXX.XXX.XXX",
         "port": 5020,
         "register_address": 1,
-        "valor": 0
+        "value": 0
     },
     {
         "start_time": "02:30",
@@ -13,7 +13,7 @@
         "ip": "XXX.XXX.XXX.XXX",
         "port": 5020,
         "register_address": 2,
-        "valor": 1
+        "value": 1
     },
     {
         "start_time": "12:31",
@@ -21,7 +21,7 @@
         "ip": "XXX.XXX.XXX.XXX",
         "port": 5020,
         "register_address": 2,
-        "valor": 0
+        "value": 0
     },
     {
         "start_time": "12:00",
@@ -29,7 +29,7 @@
         "ip": "XXX.XXX.XXX.XXX",
         "port": 5020,
         "register_address": 3,
-        "valor": 1
+        "value": 1
     },
     {
         "start_time": "12:00",
@@ -37,7 +37,7 @@
         "ip": "XXX.XXX.XXX.XXX",
         "port": 5020,
         "register_address": 4,
-        "valor": 1
+        "value": 1
     },
     {
         "start_time": "23:59",
@@ -45,6 +45,6 @@
         "ip": "XXX.XXX.XXX.XXX",
         "port": 5020,
         "register_address": 4,
-        "valor": 0
+        "value": 0
     }
 ]

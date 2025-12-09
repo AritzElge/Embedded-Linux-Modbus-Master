@@ -10,7 +10,7 @@ Functions:
     set_actuator_reg: Write a single register to control an actuator.
 
 Dependencies:
-    pymodbus: Must be installed (compatible with v1.5+ for legacy systems).
+    pymodbus: 2.5.3 Must be installed
 
 Note:
     Designed for use with polling_daemon.py and slaves.json configuration.
@@ -88,7 +88,6 @@ def set_actuator_reg(actuator_label, actuator_ip, coms_port, register_address, v
                       f"{actuator_ip} : {coms_port} : SET {register_address} = {value}")
                 return True
 
-            # R1705 Fix: No 'else' needed after a 'return'
             print(f"Error for {actuator_label}: {result}")
             return False
         finally:
