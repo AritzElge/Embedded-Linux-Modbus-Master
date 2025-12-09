@@ -1,6 +1,6 @@
 # Embedded Linux Integration with Intel Galileo Gen 2 (or ELI_galileo)
 
-![Project Status](https://img.shields.io/badge/Project_Status-WIP-blue)
+![Project Status](https://img.shields.io/badge/Project_Status-MVP-blue)
 
 [![Static Analysis](https://github.com/AritzElge/ELI_galileo/actions/workflows/static_analysis.yml/badge.svg)](https://github.com/AritzElge/ELI_galileo/actions/workflows/static_analysis.yml)
 [![Python Unit Tests](https://github.com/AritzElge/ELI_galileo/actions/workflows/python_tests.yml/badge.svg)](https://github.com/AritzElge/ELI_galileo/actions/workflows/python_tests.yml)
