@@ -3,6 +3,7 @@
 ![Project Status](https://img.shields.io/badge/Project_Status-WIP-blue)
 
 [![Static Analysis](https://github.com/AritzElge/ELI_galileo/actions/workflows/static_analysis.yml/badge.svg)](https://github.com/AritzElge/ELI_galileo/actions/workflows/static_analysis.yml)
+[![Python Unit Tests](https://github.com/AritzElge/ELI_galileo/actions/workflows/python_tests.yml/badge.svg)](https://github.com/AritzElge/ELI_galileo/actions/workflows/python_tests.yml)
 
 This repository presents a master home automation control system designed to operate on an Intel Galileo Gen 2, utilizing MODBUS TCP/IP for managing smart sensors and actuators within the local network.
 
@@ -188,9 +189,9 @@ The project is currently in active development. Below are the goals for upcoming
     - [x] Implement basic MODBUS data polling
     - [x] Implement basic MODBUS scheduled actions.
     - [X] Implement HDD-USB mounting and daily-logging daemon
-    - [ ] Automated Build Reproducibility via `.config` integration
-    - [ ] SD Card image generation via `./setup.sh` script
-    - [ ] Implement **automated Unit Testing** (e.g., Pytest for Python modules)
+    - [X] Automated Build Reproducibility via `.config` integration
+    - [X] SD Card image generation via `./setup.sh` script
+    - [X] Implement **automated Unit Testing** (e.g., Pytest for Python modules)
 
 - **Version 1.0 (Q1 2026): Initial Release**
     - [ ] `ipk` package management for Robust Field Updates
