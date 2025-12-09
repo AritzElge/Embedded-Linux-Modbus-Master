@@ -9,7 +9,6 @@ PROJECT_ROOT=$(pwd)
 # Define absolute paths for robustness
 BUILDROOT_DIR="$PROJECT_ROOT/galileo/buildroot"
 SCRIPTS_DIR="$PROJECT_ROOT/scripts"
-SRC_DIR="$PROJECT_ROOT/src"
 
 echo "[INFO] Starting setup script from $PROJECT_ROOT"
 
