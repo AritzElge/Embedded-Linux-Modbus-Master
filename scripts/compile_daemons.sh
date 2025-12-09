@@ -1,15 +1,15 @@
 #!/bin/bash
 
 # --- Path Configuration ---
-DAEMONS_PATH=./src
+PROJECT_ROOT=$1 # Capture argument 1
+
+C_SOURCE_DIR="$PROJECT_ROOT/src/error_supervisor_c"
+TOOLCHAIN_BIN_DIR="$BUILDROOT_DIR/output/host/bin"
 
 echo "[C_BUILD] Starting C daemon compilation (using internal Makefile paths)..."
 
-# Move to Daemons root directory
-cd "$(DAEMONS_PATH)" || { echo "[C_BUILD] Error: Daemons root directory not found."; exit 1; }
-
 # 1. Compile error_code_blink program
-cd error_supervisor_c || { echo "[C_BUILD] Error: C source directory not found."; exit 1; }
+cd "$(C_SOURCE_DIR)" || { echo "[C_BUILD] Error: C source directory not found."; exit 1; }
 echo "[C_BUILD] Running local make all..."
 make clean
 make all

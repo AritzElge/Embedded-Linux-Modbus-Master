@@ -1,9 +1,14 @@
 #!/bin/bash
 
-# --- Path Configuration ---
-DAEMONS_PATH=./src
-OVERLAY_USR_BIN_PATH=./galileo/buildroot/board/intel/galileo/rootfs_overlay/usr/bin
-OVERLAY_USR_SBIN_PATH=./galileo/buildroot/board/intel/galileo/rootfs_overlay/usr/sbin
+PROJECT_ROOT=$1 # Capture the argument
+
+# --- Path Configuration (Use absolute paths) ---
+DAEMONS_PATH="$PROJECT_ROOT/src"
+OVERLAY_USR_BIN_PATH="$PROJECT_ROOT/galileo/buildroot/board/intel/galileo/rootfs_overlay/usr/bin"
+OVERLAY_USR_SBIN_PATH="$PROJECT_ROOT/galileo/buildroot/board/intel/galileo/rootfs_overlay/usr/sbin"
+
+mkdir -p "$OVERLAY_USR_BIN_PATH"
+mkdir -p "$OVERLAY_USR_SBIN_PATH"
 
 # Copy the daemons to the destination directory.
 # 1. error_code_blink daemon

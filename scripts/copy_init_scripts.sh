@@ -1,8 +1,10 @@
 #!/bin/bash
 
+PROJECT_ROOT=$1 # Capture the argument
+
 # --- Path Configuration ---
-SCRIPTS_PATH=./scripts
-OVERLAY_PATH=./galileo/buildroot/board/intel/galileo/rootfs_overlay
+SCRIPTS_PATH="$PROJECT_ROOT/scripts" 
+OVERLAY_PATH="$PROJECT_ROOT/galileo/buildroot/board/intel/galileo/rootfs_overlay/etc/init.d"
 
 # Copy scripts to the destination directory.
 # The path in the overlay must mirror the final path in the rootfs.
