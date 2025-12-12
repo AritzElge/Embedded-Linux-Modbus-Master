@@ -38,7 +38,7 @@ int configure_gpio_output_raw(mraa_gpio_context gpio_pin);
  * @brief Reads status files in /tmp/status/ and returns the highest error code.
  * @return An integer (0=OK, >0=Error code). Returns 15 if status dir not found.
  */
-int get_operation_status()
+inline int get_operation_status()
 {
     DIR *d;
     struct dirent *dir;
@@ -105,37 +105,6 @@ void do_blink(mraa_gpio_context gpio_pin, int seconds, int nanoseconds)
 }
 
 /**
- * @brief Blinks a specific 4-bit error code sequence on a GPIO pin.
- *
- * This function takes an integer error code, processes its 4 least significant bits, 
- * and translates each bit into a distinct blink pattern using do_blink(). 
- * A '1' bit results in a long blink duration, while a '0' bit results in a short 
- * blink duration. A synchronization delay occurs before the sequence starts.
- *
- * @param led_gpio_pin The MRAA GPIO context object representing the physical LED pin.
- * @param error_code The integer value representing the error code to be signaled (only LSB 4 bits used).
- */
-void blink_error_code(mraa_gpio_context led_gpio_pin, int error_code)
-{
-    sleep(T_OFF_SYNC); 
-
-    // Iterate only 4 times (from 3 down to 0) instead of 8
-    for (int i = 3; i >= 0; i--) 
-    {
-        int bit = (error_code >> i) & 1;
-
-        if (bit == 1)
-        {
-            do_blink(led_gpio_pin, T_LONG_S, T_LONG_NS);
-        }
-        else
-        {
-            do_blink(led_gpio_pin, T_SHORT_S, T_SHORT_NS);
-        }
-    }
-}
-
-/**
  * @brief Configures a given MRAA GPIO pin context for output direction.
  *
  * This function sets the specified GPIO pin direction to output mode using the 
@@ -185,6 +154,7 @@ int main()
         }
     }
 
+	// Configure LED GPIO
     mraa_gpio_context led_gpio_pin = mraa_gpio_init_raw(7);
     if (0 != configure_gpio_output_raw(led_gpio_pin))
     {
@@ -197,7 +167,7 @@ int main()
         int current_status = get_operation_status(); 
 
         if (current_status == 0)
-	{
+		{
             // OK Status: Heartbeat activated
             struct timespec ts_on = { .tv_sec = 0L, .tv_nsec = T_ON_HEARTBEAT };
             mraa_gpio_write(led_gpio_pin, 1);
@@ -208,13 +178,27 @@ int main()
         else
         {
             // Error status: Blink the code
-            blink_error_code(led_gpio_pin, current_status);
-            // The long pause is handled by the main sleep(1) outside the if/else
+			sleep(T_OFF_SYNC); 
+			
+		    // Iterate 4 times to tanslate code according to "docs/ops_guide.md"
+		    for (int i = 3; i >= 0; i--) 
+		    {
+		        int bit = (current_status >> i) & 1;
+		
+		        if (bit == 1)
+		        {
+		            do_blink(led_gpio_pin, T_LONG_S, T_LONG_NS);
+		        }
+		        else
+		        {
+		            do_blink(led_gpio_pin, T_SHORT_S, T_SHORT_NS);
+		        }
+		    }
         }
         
         // Main loop pause of 1 second to control the frequency of the loop
         sleep(1);
     }
-
+	
     return 0;
 }
