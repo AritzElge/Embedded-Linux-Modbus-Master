@@ -124,9 +124,9 @@ void do_blink(mraa_gpio_context gpio_pin, int seconds, int nanoseconds)
  */
 int configure_gpio_output_raw(mraa_gpio_context gpio_pin)
 {
-  mraa_result_t result = MRAA_SUCCESS;
+    mraa_result_t result = MRAA_SUCCESS;
   
-  if (gpio_pin == NULL)
+    if (gpio_pin == NULL)
     { 
         fprintf(stderr, "MRAA Init Error. Check configuration.\n");
         return 99; 
