@@ -16,19 +16,20 @@ Before starting the deployment, ensure you have the following items and tools re
 This step is performed on the Host PC.
 1. **Clone the Repository:**
 ```
-git clone github.com
+git clone [github.com](https://github.com/AritzElge/ELI_galileo)
 cd ELI_galileo
 ```
 2. **Configure and Compile the Workspace:**
 The ./setup.sh script automates the Buildroot process, generating the cross-toolchain and the final sdcard.img image in the output/images/ directory.
 ```
-./setup.sh
+sudo ./setup.sh
 ```
 
 ##  Deployment to MicroSD Card and HDD
 1. **Flash the Image:**
 Use dd to write the generated image to the MicroSD card. CAUTION: Make sure you select the correct device (/dev/sdx).
 ```
+cd galileo/buildroot/
 sudo dd if=output/images/sdcard.img of=/dev/sdx bs=4M status=progress
 ```
 
@@ -62,12 +63,8 @@ To mitigate ARP poisoning attacks, configure static ARP tables on the Galileo Ge
 Upon successful initial boot, the following procedures must be executed via SSH to formally verify system integrity and operational readiness.
 1. **System Health Checks**
 *   **Verify Heartbeat:** Physically confirm the onboard LED is blinking at the standard 1Hz rate. If specific error codes are displayed, consult the Operations Guide.
-*   **Verify Daemons Status:** Log in via SSH and confirm all expected services are active:
-```
-systemctl status domotica-schedule-daemon
-systemctl status domotica-polling-daemon
-# Verify other daemons...
-```
+*   **Verify Daemons Status:** Log in via SSH and confirm all expected services are active.
+
 2. **Data Integrity and Logging Verification**
 *   **Confirm HDD Mount:** Ensure the external HDD is correctly mounted and available:
 ```
@@ -76,14 +73,16 @@ mountpoint /mnt/hdd
 *   **Verify Timestamps:** Check the system time and a log file entry to confirm accurate RTC synchronization:
 ```
 date
-tail -n 1 /mnt/hdd/logs/system.log
+ls /mnt/hdd/logs/
+cd /mnt/hdd/logs/
+# tail -n 1 ***.log to read last entry of the desired log.
 ```
 3. **Hardware Interface Testing**
 *   **Modbus Communication Test:**
     *   **Procedure:** Use a command-line utility or Python test script to poll a known sensor value from one of the Modbus devices.
     *   **Expected Result:** A valid data reading is returned (e.g., temperature value) and logged without errors in /mnt/hdd/logs/modbus.log.
 
-4. **Network Security Verification**
+4. **Network Security Verification - Not yet implemented**
 *   **Firewall Test (Principle of Least Privilege):**
     *   **Procedure:** From a different host on the network (one not specified in the iptables allow rules), attempt to SSH into the Galileo board or connect to the Modbus port.
     *   **Expected Result:** The connection attempts are actively refused by the Galileo`s firewall.

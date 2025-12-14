@@ -139,7 +139,7 @@ A detailed specification of the system requirements can be found in the document
 2.  **Configure the Workspace:**
     Run the setup script locally on your Host PC. This script automates the configuration of the Buildroot workspace, downloads all necessary toolchains and dependencies, and compiles the system image (`sdcard.img`) and application packages (`.ipk`).
     ```bash
-    ./setup.sh
+    sudo ./setup.sh
     ```
 
 3.  **Flash the Image to MicroSD**

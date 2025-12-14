@@ -26,29 +26,29 @@
 #define QUARK_GPIO_46   46  
 
 // -- Function Prototypes (Declarations) --
-int get_operation_status(void);
+inline int get_operation_status(void);
 void do_blink(mraa_gpio_context gpio_pin, int seconds, int nanoseconds);
-void blink_error_code(mraa_gpio_context led_gpio_pin, int error_code);
 int configure_gpio_output_raw(mraa_gpio_context gpio_pin);
 
-
 // -- Function Implementations (Definitions) --
-
 /** int get_operation_status()
  * @brief Reads status files in /tmp/status/ and returns the highest error code.
  * @return An integer (0=OK, >0=Error code). Returns 15 if status dir not found.
  */
-int get_operation_status()
+inline int get_operation_status()
 {
     DIR *d;
     struct dirent *dir;
     int highest_error = 0;
     
     d = opendir(STATUS_DIR);
-    if (d) {
-        while ((dir = readdir(d)) != NULL) {
+    if (d)
+	{
+        while ((dir = readdir(d)) != NULL)
+		{
             // Skip "." and ".." directory entries
-            if (strcmp(dir->d_name, ".") == 0 || strcmp(dir->d_name, "..") == 0) {
+            if (strcmp(dir->d_name, ".") == 0 || strcmp(dir->d_name, "..") == 0)
+			{
                 continue;
             }
 
@@ -56,24 +56,31 @@ int get_operation_status()
             snprintf(path, sizeof(path), "%s%s", STATUS_DIR, dir->d_name);
             
             FILE *fp = fopen(path, "r");
-            if (fp != NULL) {
+            if (fp != NULL)
+			{
                 // Use fscanf to read an integer number (can be multiple digits)
                 int status_code = 0;
-                if (fscanf(fp, "%d", &status_code) == 1) {
-                    if (status_code > highest_error) {
+                if (fscanf(fp, "%d", &status_code) == 1)
+				{
+                    if (status_code > highest_error)
+					{
                         highest_error = status_code;
                     }
                 }
                 // If fscanf fails to read a number, it skips the comparison logic.
                 fclose(fp);
-            } else {
+            }
+			else
+			{
                 fprintf(stderr, "ERROR: Could not open status file %s\n", path);
                 // Error 15 now indicates "Cannot read status file"
                 if (highest_error == 0) highest_error = 15; 
             }
         }
         closedir(d);
-    } else {
+    }
+	else
+	{
         fprintf(stderr, "WARNING: Status directory %s not found.\n", STATUS_DIR);
         // Error 15 also for "Status directory missing"
         return 15; 
@@ -105,37 +112,6 @@ void do_blink(mraa_gpio_context gpio_pin, int seconds, int nanoseconds)
 }
 
 /**
- * @brief Blinks a specific 4-bit error code sequence on a GPIO pin.
- *
- * This function takes an integer error code, processes its 4 least significant bits, 
- * and translates each bit into a distinct blink pattern using do_blink(). 
- * A '1' bit results in a long blink duration, while a '0' bit results in a short 
- * blink duration. A synchronization delay occurs before the sequence starts.
- *
- * @param led_gpio_pin The MRAA GPIO context object representing the physical LED pin.
- * @param error_code The integer value representing the error code to be signaled (only LSB 4 bits used).
- */
-void blink_error_code(mraa_gpio_context led_gpio_pin, int error_code)
-{
-    sleep(T_OFF_SYNC); 
-
-    // Iterate only 4 times (from 3 down to 0) instead of 8
-    for (int i = 3; i >= 0; i--) 
-    {
-        int bit = (error_code >> i) & 1;
-
-        if (bit == 1)
-        {
-            do_blink(led_gpio_pin, T_LONG_S, T_LONG_NS);
-        }
-        else
-        {
-            do_blink(led_gpio_pin, T_SHORT_S, T_SHORT_NS);
-        }
-    }
-}
-
-/**
  * @brief Configures a given MRAA GPIO pin context for output direction.
  *
  * This function sets the specified GPIO pin direction to output mode using the 
@@ -148,9 +124,9 @@ void blink_error_code(mraa_gpio_context led_gpio_pin, int error_code)
  */
 int configure_gpio_output_raw(mraa_gpio_context gpio_pin)
 {
-  mraa_result_t result = MRAA_SUCCESS;
+    mraa_result_t result = MRAA_SUCCESS;
   
-  if (gpio_pin == NULL)
+    if (gpio_pin == NULL)
     { 
         fprintf(stderr, "MRAA Init Error. Check configuration.\n");
         return 99; 
@@ -185,6 +161,7 @@ int main()
         }
     }
 
+	// Configure LED GPIO
     mraa_gpio_context led_gpio_pin = mraa_gpio_init_raw(7);
     if (0 != configure_gpio_output_raw(led_gpio_pin))
     {
@@ -197,7 +174,7 @@ int main()
         int current_status = get_operation_status(); 
 
         if (current_status == 0)
-	{
+		{
             // OK Status: Heartbeat activated
             struct timespec ts_on = { .tv_sec = 0L, .tv_nsec = T_ON_HEARTBEAT };
             mraa_gpio_write(led_gpio_pin, 1);
@@ -208,13 +185,27 @@ int main()
         else
         {
             // Error status: Blink the code
-            blink_error_code(led_gpio_pin, current_status);
-            // The long pause is handled by the main sleep(1) outside the if/else
+			sleep(T_OFF_SYNC); 
+			
+		    // Iterate 4 times to tanslate code according to "docs/ops_guide.md"
+		    for (int i = 3; i >= 0; i--) 
+		    {
+		        int bit = (current_status >> i) & 1;
+		
+		        if (bit == 1)
+		        {
+		            do_blink(led_gpio_pin, T_LONG_S, T_LONG_NS);
+		        }
+		        else
+		        {
+		            do_blink(led_gpio_pin, T_SHORT_S, T_SHORT_NS);
+		        }
+		    }
         }
         
         // Main loop pause of 1 second to control the frequency of the loop
         sleep(1);
     }
-
+	
     return 0;
 }
